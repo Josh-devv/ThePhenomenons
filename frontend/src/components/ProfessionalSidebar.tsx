@@ -1,12 +1,25 @@
-import { BarChart3, Users, FileText, ClipboardList, User, Settings, LogOut } from "lucide-react";
+import {
+  BarChart3,
+  Users,
+  FileText,
+  ClipboardList,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import logo from "@/assets/logo.png";
 
 const mainLinks = [
   { icon: BarChart3, label: "Dashboard", to: "/professional" },
   { icon: Users, label: "Patients", to: "/professional/patients" },
   { icon: FileText, label: "Reports", to: "/professional/reports" },
-  { icon: ClipboardList, label: "Plan Templates", to: "/professional/templates" },
+  {
+    icon: ClipboardList,
+    label: "Plan Templates",
+    to: "/professional/templates",
+  },
 ];
 
 const bottomLinks = [
@@ -14,14 +27,26 @@ const bottomLinks = [
   { icon: Settings, label: "Settings", to: "/professional/settings" },
 ];
 
-export function ProfessionalSidebar() {
+export function ProfessionalSidebar({ isMobile }: { isMobile?: boolean }) {
   return (
-    <aside className="flex h-screen w-64 flex-col" style={{ backgroundColor: "hsl(220, 26%, 14%)" }}>
-      <div className="flex items-center gap-2 px-6 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-          <span className="text-sm font-bold text-primary-foreground">W</span>
+    <aside
+      className={cn(
+        "flex flex-col",
+        isMobile ? "h-full w-full" : "h-screen w-64",
+      )}
+      style={{ backgroundColor: "hsl(220, 26%, 14%)" }}
+    >
+      <div className="flex items-center gap-3 px-6 py-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/20 p-1">
+          <img
+            src={logo}
+            alt="WellSync Logo"
+            className="w-full h-full object-contain"
+          />
         </div>
-        <span className="text-lg font-bold text-primary-foreground">WellSync Pro</span>
+        <span className="text-lg font-bold text-primary-foreground">
+          WellSync Pro
+        </span>
       </div>
 
       <nav className="flex flex-1 flex-col px-3">
@@ -36,7 +61,7 @@ export function ProfessionalSidebar() {
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "text-primary-foreground/70 hover:text-primary-foreground"
+                    : "text-primary-foreground/70 hover:text-primary-foreground",
                 )
               }
             >
@@ -56,7 +81,7 @@ export function ProfessionalSidebar() {
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "text-primary-foreground/70 hover:text-primary-foreground"
+                    : "text-primary-foreground/70 hover:text-primary-foreground",
                 )
               }
             >

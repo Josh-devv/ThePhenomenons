@@ -10,7 +10,14 @@ interface StatCardProps {
   className?: string;
 }
 
-export function StatCard({ title, value, icon: Icon, trend, trendUp, className }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  icon: Icon,
+  trend,
+  trendUp,
+  className,
+}: StatCardProps) {
   return (
     <div className={cn("rounded-xl bg-card p-6 shadow-card", className)}>
       <div className="flex items-center justify-between">
@@ -18,7 +25,12 @@ export function StatCard({ title, value, icon: Icon, trend, trendUp, className }
           <p className="text-body text-muted-foreground">{title}</p>
           <p className="mt-1 text-[28px] font-bold text-foreground">{value}</p>
           {trend && (
-            <p className={cn("mt-1 text-small font-medium", trendUp ? "text-success" : "text-destructive")}>
+            <p
+              className={cn(
+                "mt-1 text-small font-medium",
+                trendUp ? "text-success" : "text-destructive",
+              )}
+            >
               {trendUp ? "↑" : "↓"} {trend}
             </p>
           )}

@@ -183,7 +183,7 @@ export default function PatientCheckin() {
   return (
     <div className="animate-fade-in flex h-[calc(100vh-4rem)] flex-col">
       <div className="mb-6">
-        <h1 className="text-foreground">Daily Check-in</h1>
+        <h1 className="text-foreground">AI Assistant</h1>
         <p className="mt-1 text-body text-muted-foreground">
           Chat with your AI health partner
         </p>
