@@ -23,3 +23,5 @@ def calculate_health_score(user_id):
     # convert 1-10 scale → percentage
     percent = (avg / 10) * 100
     return round(percent, 2)
+
+ada

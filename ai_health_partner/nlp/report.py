@@ -40,3 +40,5 @@ def generate_followup_report(user_id: str, has_new_symptoms: bool) -> str:
         return follow_summary + f"\n{checkup_summary}"
 
     return follow_summary
+
+asds
