@@ -31,14 +31,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<LandingPage />} />
 
-          <Route path="/professional" element={<ProfessionalLayout />}>
-            <Route index element={<ProfessionalDashboard />} />
-            <Route path="patients" element={<ProfessionalPatients />} />
-            <Route path="chat/:patientId" element={<ProfessionalChat />} />
-            <Route path="reports" element={<ProfessionalReports />} />
-            <Route path="templates" element={<ProfessionalTemplates />} />
-            <Route path="profile" element={<ProfessionalProfile />} />
-            <Route path="settings" element={<ProfessionalSettings />} />
+          {/* Patient Routes */}
+          <Route path="/patient" element={<PatientLayout />}>
+            <Route index element={<PatientDashboard />} />
+            <Route path="ai-assistant" element={<PatientCheckin />} />
+            <Route path="plan" element={<PatientPlan />} />
+            <Route path="profile" element={<PatientProfile />} />
+            <Route path="settings" element={<PatientSettings />} />
           </Route>
 
           {/* Professional Routes */}

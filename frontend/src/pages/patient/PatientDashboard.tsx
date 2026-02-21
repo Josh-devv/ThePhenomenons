@@ -40,13 +40,13 @@ export default function PatientDashboard() {
           icon={Activity}
           trend="5% from last week"
           trendUp
-          className="shadow-lg hover:shadow-xl transition-shadow"
+          className="bg-primary/5 shadow-lg hover:shadow-xl transition-shadow"
         />
         <StatCard
           title="Check-in Streak"
           value="12 days"
           icon={ClipboardList}
-          className="shadow-lg hover:shadow-xl transition-shadow"
+          className="bg-primary/5 shadow-lg hover:shadow-xl transition-shadow"
         />
         <StatCard
           title="Risk Level"
@@ -54,7 +54,7 @@ export default function PatientDashboard() {
           icon={Shield}
           trend="Stable"
           trendUp
-          className="shadow-lg hover:shadow-xl transition-shadow"
+          className="bg-primary/5 shadow-lg hover:shadow-xl transition-shadow"
         />
         <StatCard
           title="Plan Progress"
@@ -62,7 +62,7 @@ export default function PatientDashboard() {
           icon={TrendingUp}
           trend="On track"
           trendUp
-          className="shadow-lg hover:shadow-xl transition-shadow"
+          className="bg-primary/5 shadow-lg hover:shadow-xl transition-shadow"
         />
       </div>
 
