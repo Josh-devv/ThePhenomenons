@@ -89,11 +89,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\USER\\source\\repos\\E-Clinic AI\\E-Clinic AI.csproj",
+      "projectUniqueName": "C:\\Users\\USER\\source\\repos\\ThePhenomenons\\backend\\E-Clinic AI.csproj",
       "projectName": "E-Clinic AI",
-      "projectPath": "C:\\Users\\USER\\source\\repos\\E-Clinic AI\\E-Clinic AI.csproj",
+      "projectPath": "C:\\Users\\USER\\source\\repos\\ThePhenomenons\\backend\\E-Clinic AI.csproj",
       "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\USER\\source\\repos\\E-Clinic AI\\obj\\",
+      "outputPath": "C:\\Users\\USER\\source\\repos\\ThePhenomenons\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
