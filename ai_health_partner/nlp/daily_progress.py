@@ -15,5 +15,3 @@ def medication_adherence(user_id):
         return "No prescription data"
 
     return f"{taken} / {prescribed}"
-
-aadd

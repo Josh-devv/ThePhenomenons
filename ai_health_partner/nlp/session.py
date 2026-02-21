@@ -93,5 +93,3 @@ def get_history(user_id: str) -> list:
 
         # Convert all stored JSON text rows back into a list of dictionaries
         return [json.loads(row["report"]) for row in rows]
-
-asdsd

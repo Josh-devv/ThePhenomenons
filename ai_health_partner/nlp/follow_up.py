@@ -84,5 +84,3 @@ def follow_up(user_id: str, user_input: str) -> str:
         return generate_followup_report(user_id, has_new_symptoms=False)
 
     return "Just checking in to see how you're doing today! 😊"
-
-aawf

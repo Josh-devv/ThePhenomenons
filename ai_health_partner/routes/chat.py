@@ -24,5 +24,3 @@ def chat(user_id: str, chat_module: str, req: ChatRequest):
         )
 
     return {"reply": reply, "confidence": req.confidence}
-
-sadsdd
