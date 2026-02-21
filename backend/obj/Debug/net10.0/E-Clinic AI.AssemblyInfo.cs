@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("E-Clinic AI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+97911f484f5560e741a6e9f10d8af84bce2ec716")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1fe4186b247990a2ab468d5b41af97ea935d9c3a")]
 [assembly: System.Reflection.AssemblyProductAttribute("E-Clinic AI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("E-Clinic AI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
