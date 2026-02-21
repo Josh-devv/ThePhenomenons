@@ -13,7 +13,7 @@ origins = [
     "https://your-future-production-domain.com"
 ]
 
-# Adding middleware to the FastAPI app
+# To add middleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# This connects the chat.py endpoints to the main web server
+# T0 connects the chat.py endpoints to the main web server
 app.include_router(chat_router, prefix="/api", tags=["Chatbot"])
 
 @app.get("/")

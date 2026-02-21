@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-# Import the new TriageReport and FollowUpReport models
 from schemas import ChatRequest, TriageReport, FollowUpReport
 from nlp.initial_triage import triage_chat
 from nlp.follow_up import follow_up
@@ -12,13 +11,13 @@ router = APIRouter()
 def chat(user_id: str, chat_module: str, req: ChatRequest):
     chat_module = chat_module.lower()
 
-    # Route the request to the correct conversation engine
+    # To route the request to the correct conversation engine
     if chat_module == "triage":
         reply = triage_chat(user_id, req.user_input)
     elif chat_module == "followup":
         reply = follow_up(user_id, req.user_input)
     else:
-        # Return a professional error if the website sends a bad request
+        # To return a professional error if the website sends a bad request
         raise HTTPException(
             status_code=400,
             detail="Invalid chat module. Please use 'triage' or 'followup'."
@@ -26,12 +25,10 @@ def chat(user_id: str, chat_module: str, req: ChatRequest):
 
     return {"reply": reply, "confidence": req.confidence}
 
-# --- NEW ENDPOINTS WITH RESPONSE MODELS ---
-
 @router.get("/{user_id}/report/triage", response_model=TriageReport)
 def get_triage_report(user_id: str):
     """
-    Fetches the final structured triage report for a specific user session.
+    Fetches the final structured triage report for the specific user session.
     The ASP.NET backend will call this to populate the professional dashboard.
     """
     report = generate_triage_report(user_id)
