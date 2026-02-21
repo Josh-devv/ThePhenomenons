@@ -11,5 +11,3 @@ app.include_router(chat_router, prefix="/api", tags=["Chatbot"])
 @app.get("/")
 async def root():
     return {"message": "Good day, how have you been today?"}
-
-adadd

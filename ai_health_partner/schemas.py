@@ -7,5 +7,3 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     confidence: float = 1.0
-
-    addad
