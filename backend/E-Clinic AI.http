@@ -1,0 +1,6 @@
+@E_Clinic_AI_HostAddress = http://localhost:5043
+
+GET {{E_Clinic_AI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
