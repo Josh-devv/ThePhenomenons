@@ -70,7 +70,7 @@ const initialMessages: Message[] = [
   {
     role: "ai",
     content:
-      "Good morning, Sarah! 👋 How are you feeling today? Let's start your daily health check-in.",
+      "Good morning, Sarah!  How are you feeling today? Let's start your daily health check-in.",
   },
 ];
 
@@ -122,7 +122,7 @@ export default function PatientCheckin() {
 
       const aiResponses: Record<string, string> = {
         "I feel great today!":
-          "That's wonderful to hear! 🎉 Any changes in sleep quality, diet, or physical activity since yesterday?",
+          "That's wonderful to hear!  Any changes in sleep quality, diet, or physical activity since yesterday?",
         "I have a mild headache":
           "I'm sorry to hear that. Can you describe the headache? Is it throbbing, dull, or sharp? When did it start?",
         "I'm feeling tired":

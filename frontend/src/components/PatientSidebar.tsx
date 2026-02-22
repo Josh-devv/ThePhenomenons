@@ -7,7 +7,6 @@ const mainLinks = [
   { icon: Home, label: "Overview", to: "/patient" },
   { icon: ClipboardList, label: "AI Assistant", to: "/patient/ai-assistant" },
   { icon: FileText, label: "My Plan", to: "/patient/plan" },
-  { icon: Settings, label: "Settings", to: "/patient/settings" },
 ];
 
 export function PatientSidebar({ isMobile }: { isMobile?: boolean }) {
