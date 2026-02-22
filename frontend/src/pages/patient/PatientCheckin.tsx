@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Send,
   Bot,
@@ -9,6 +9,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { api } from "@/api/api";
+import { createHealthCheckinSession } from "@/services/gemini";
 
 interface Message {
   role: "ai" | "user";
@@ -91,56 +92,90 @@ type ChatPhase =
   | "approved";
 
 export default function PatientCheckin() {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(true); // Start true while AI initializes
   const [phase, setPhase] = useState<ChatPhase>("chat");
-  const [messageCount, setMessageCount] = useState(0);
   const [selectedProfessional, setSelectedProfessional] =
     useState<Professional | null>(null);
   const [rejectedIds, setRejectedIds] = useState<number[]>([]);
 
-  const sendMessage = (text: string) => {
-    if (!text.trim() || phase !== "chat") return;
+  const chatRef = useRef<any>(null);
+
+  // Initialize the Gemini Session on mount
+  useEffect(() => {
+    let isMounted = true;
+    createHealthCheckinSession().then(async (session) => {
+      chatRef.current = session;
+      try {
+        // Kick off the conversation
+        const response = await session.sendMessage({
+          message: "Hello. I would like to check in.",
+        });
+        if (isMounted) {
+          setMessages([{ role: "ai", content: response.text }]);
+          setIsTyping(false);
+        }
+      } catch (err) {
+        console.error("Failed to initialize chat:", err);
+        if (isMounted) {
+          setMessages([
+            {
+              role: "ai",
+              content:
+                "Sorry, I am having trouble connecting to my service right now.",
+            },
+          ]);
+          setIsTyping(false);
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || phase !== "chat" || !chatRef.current) return;
+
+    // 1. Add User Message
     const userMsg: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
-    const newCount = messageCount + 1;
-    setMessageCount(newCount);
 
-    setTimeout(() => {
-      if (newCount >= 3) {
-        const aiMsg: Message = {
-          role: "ai",
-          content:
-            "Thank you for sharing all that information. I've completed your assessment and compiled a health report based on our conversation.",
-        };
-        setMessages((prev) => [...prev, aiMsg]);
-        setIsTyping(false);
-        setPhase("review-report");
-        return;
-      }
+    // 2. Await Gemini Response
+    try {
+      const response = await chatRef.current.sendMessage({ message: text });
+      const aiText = response.text || "";
 
-      const aiResponses: Record<string, string> = {
-        "I feel great today!":
-          "That's wonderful to hear!  Any changes in sleep quality, diet, or physical activity since yesterday?",
-        "I have a mild headache":
-          "I'm sorry to hear that. Can you describe the headache? Is it throbbing, dull, or sharp? When did it start?",
-        "I'm feeling tired":
-          "Let's look into that. How many hours did you sleep last night? Have you been staying hydrated?",
-        "I have some pain":
-          "I'd like to help. Can you tell me where the pain is located and rate it from 1-10?",
-      };
-      const aiMsg: Message = {
-        role: "ai",
-        content:
-          aiResponses[text] ||
-          "Thank you for sharing. Could you tell me more about how you're feeling? Any specific symptoms or changes you've noticed?",
-      };
+      const aiMsg: Message = { role: "ai", content: aiText };
       setMessages((prev) => [...prev, aiMsg]);
       setIsTyping(false);
-    }, 1500);
+
+      // 3. Check for Completion Condition in Output
+      const lowerText = aiText.toLowerCase();
+      if (
+        lowerText.includes("ready to compile") ||
+        lowerText.includes("summarize the findings") ||
+        lowerText.includes("report for a doctor")
+      ) {
+        // The AI has indicated it's finished the intake
+        setTimeout(() => setPhase("review-report"), 2000);
+      }
+    } catch (err) {
+      console.error("AI Communication Error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          content:
+            "I'm having trouble understanding you right now. Please try again.",
+        },
+      ]);
+      setIsTyping(false);
+    }
   };
 
   const handleSendToDoctor = async () => {
