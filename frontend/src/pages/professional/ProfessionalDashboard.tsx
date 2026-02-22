@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Users, FileText, AlertTriangle, TrendingUp, Star } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { RiskBadge } from "@/components/RiskBadge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const recentPatients = [
   {
@@ -13,8 +15,9 @@ const recentPatients = [
   },
 ];
 
-const pendingReports = [
+const initialPendingReports = [
   {
+    id: "mock-1",
     patient: "Michael Chen",
     type: "Risk Assessment",
     generated: "2 hours ago",
@@ -24,6 +27,27 @@ const pendingReports = [
 
 export default function ProfessionalDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [pendingReports, setPendingReports] = useState(initialPendingReports);
+
+  useEffect(() => {
+    // Check if the Patient side left a live report for us
+    const liveReportStr = localStorage.getItem("wellsync_live_report");
+    if (liveReportStr) {
+      try {
+        const liveReport = JSON.parse(liveReportStr);
+        // Prepend it to the list of pending reports
+        setPendingReports((prev) => {
+          // Prevent duplicates if already tracking
+          if (prev.some((r) => r.id === liveReport.id)) return prev;
+
+          return [liveReport, ...prev];
+        });
+      } catch (e) {
+        console.error("Failed to parse live report from localStorage", e);
+      }
+    }
+  }, []);
 
   return (
     <div className="animate-fade-in">
@@ -135,7 +159,10 @@ export default function ProfessionalDashboard() {
                 <p className="mt-0.5 text-small text-muted-foreground">
                   {report.generated}
                 </p>
-                <button className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-small font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                <button
+                  onClick={() => navigate(`/professional/chat/${report.id}`)}
+                  className="mt-3 w-full rounded-lg bg-primary px-4 py-2 text-small font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
                   Review
                 </button>
               </div>

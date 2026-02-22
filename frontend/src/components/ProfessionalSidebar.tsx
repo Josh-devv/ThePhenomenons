@@ -54,7 +54,7 @@ export function ProfessionalSidebar({ isMobile }: { isMobile?: boolean }) {
           />
         </div>
         <span className="text-lg font-bold text-primary-foreground">
-          WellSync Pro
+          WellSync
         </span>
       </div>
 

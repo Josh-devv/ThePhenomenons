@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { api } from "@/api/api";
 import { createHealthCheckinSession } from "@/services/gemini";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Message {
   role: "ai" | "user";
@@ -100,6 +101,8 @@ export default function PatientCheckin() {
     useState<Professional | null>(null);
   const [rejectedIds, setRejectedIds] = useState<number[]>([]);
 
+  const { user } = useAuth();
+
   const chatRef = useRef<any>(null);
 
   // Initialize the Gemini Session on mount
@@ -179,67 +182,33 @@ export default function PatientCheckin() {
   };
 
   const handleSendToDoctor = async () => {
-    try {
-      // Send the generated report conversation to the backend
-      await api.post("/report", {
-        messages: messages,
-        patientName: "Sarah", // NOTE: In a real flow, use 'user?.name'
-      });
-      console.log("Successfully posted report to backend.");
-    } catch (err) {
-      console.error("Failed to push report to backend:", err);
-      // Allowing the UI to gracefully proceed for demo/mock paths
-    }
+    // 1. Compile the payload
+    const payload = {
+      id: "live-session",
+      patient: user?.name || "Sarah Johnson",
+      type: "AI Triage Report",
+      generated: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      risk: "high", // Provide a mock risk tag for the UI
+      chatHistory: messages,
+    };
 
+    // 2. Save directly to localStorage for the Professional side to read
+    localStorage.setItem("wellsync_live_report", JSON.stringify(payload));
+
+    // 3. Skip selection list entirely and show the confirmation
     setMessages((prev) => [
       ...prev,
       {
         role: "ai",
         content:
-          "Please select a healthcare professional below to send your generated report to:",
+          "I have securely forwarded your intake report. A healthcare professional will review it and connect with you here shortly.",
       },
     ]);
-    setPhase("select-professional");
-  };
-
-  const selectProfessional = (prof: Professional) => {
-    setSelectedProfessional(prof);
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", content: `I'd like to send my report to ${prof.name}.` },
-    ]);
     setPhase("under-review");
-
-    // Simulate professional response (approve or reject randomly for demo)
-    setTimeout(() => {
-      const shouldReject = Math.random() > 0.6;
-      if (shouldReject) {
-        setRejectedIds((prev) => [...prev, prof.id]);
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "ai",
-            content: `Unfortunately, ${prof.name} is currently unavailable. Please choose another professional from the list below.`,
-          },
-        ]);
-        setPhase("select-professional");
-        setSelectedProfessional(null);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "ai",
-            content: `Great news! 🎉 ${prof.name} has accepted your report and has joined the conversation. You can now discuss your health plan directly.`,
-          },
-        ]);
-        setPhase("approved");
-      }
-    }, 3000);
   };
-
-  const availableProfessionals = professionals.filter(
-    (p) => !rejectedIds.includes(p.id),
-  );
 
   return (
     <div className="animate-fade-in flex h-[calc(100vh-4rem)] flex-col">
@@ -303,12 +272,12 @@ export default function PatientCheckin() {
           )}
 
           {/* Under Review Status */}
-          {phase === "under-review" && selectedProfessional && (
+          {phase === "under-review" && (
             <div className="mx-auto mt-4 flex max-w-md items-center gap-3 rounded-xl border border-warning/30 bg-warning/5 p-4">
               <Clock className="h-5 w-5 shrink-0 text-warning" />
               <p className="text-body font-medium text-foreground">
-                Your report is under review by {selectedProfessional.name}.
-                Please wait shortly...
+                Your report is under review by a healthcare professional. Please
+                wait shortly...
               </p>
             </div>
           )}
@@ -326,53 +295,12 @@ export default function PatientCheckin() {
             </div>
           )}
 
-          {/* Professional Selection */}
-          {phase === "select-professional" && (
-            <div className="mt-4 space-y-3">
-              <p className="text-body font-medium text-muted-foreground">
-                Select a healthcare professional:
-              </p>
-              <div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                {availableProfessionals.map((prof) => (
-                  <button
-                    key={prof.id}
-                    onClick={() => selectProfessional(prof)}
-                    className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-all hover:border-primary hover:shadow-md"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                      {prof.avatar}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-body font-semibold text-foreground">
-                        {prof.name}
-                      </p>
-                      <p className="text-small text-muted-foreground">
-                        {prof.specialty}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <div className="flex items-center gap-0.5">
-                          <Star className="h-3 w-3 fill-warning text-warning" />
-                          <span className="text-small font-medium text-foreground">
-                            {prof.rating}
-                          </span>
-                        </div>
-                        <span className="text-small text-muted-foreground">
-                          · {prof.experience}
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Approved Status */}
-          {phase === "approved" && selectedProfessional && (
+          {/* Approved Status (For backwards compatibility if needed) */}
+          {phase === "approved" && (
             <div className="mx-auto mt-4 flex max-w-md items-center gap-3 rounded-xl border border-success/30 bg-success/5 p-4">
               <CheckCircle className="h-5 w-5 shrink-0 text-success" />
               <p className="text-body font-medium text-foreground">
-                {selectedProfessional.name} is now in the conversation.
+                A professional has joined the conversation.
               </p>
             </div>
           )}
