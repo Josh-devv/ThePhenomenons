@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Send,
   Bot,
@@ -8,6 +8,8 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { api } from "@/api/api";
+import { createHealthCheckinSession } from "@/services/gemini";
 
 interface Message {
   role: "ai" | "user";
@@ -83,62 +85,121 @@ const quickReplies = [
 
 type ChatPhase =
   | "chat"
+  | "review-report"
   | "select-professional"
   | "under-review"
   | "rejected"
   | "approved";
 
 export default function PatientCheckin() {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(true); // Start true while AI initializes
   const [phase, setPhase] = useState<ChatPhase>("chat");
-  const [messageCount, setMessageCount] = useState(0);
   const [selectedProfessional, setSelectedProfessional] =
     useState<Professional | null>(null);
   const [rejectedIds, setRejectedIds] = useState<number[]>([]);
 
-  const sendMessage = (text: string) => {
-    if (!text.trim() || phase !== "chat") return;
+  const chatRef = useRef<any>(null);
+
+  // Initialize the Gemini Session on mount
+  useEffect(() => {
+    let isMounted = true;
+    createHealthCheckinSession().then(async (session) => {
+      chatRef.current = session;
+      try {
+        // Kick off the conversation
+        const response = await session.sendMessage({
+          message: "Hello. I would like to check in.",
+        });
+        if (isMounted) {
+          setMessages([{ role: "ai", content: response.text }]);
+          setIsTyping(false);
+        }
+      } catch (err) {
+        console.error("Failed to initialize chat:", err);
+        if (isMounted) {
+          setMessages([
+            {
+              role: "ai",
+              content:
+                "Sorry, I am having trouble connecting to my service right now.",
+            },
+          ]);
+          setIsTyping(false);
+        }
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || phase !== "chat" || !chatRef.current) return;
+
+    // 1. Add User Message
     const userMsg: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
-    const newCount = messageCount + 1;
-    setMessageCount(newCount);
 
-    setTimeout(() => {
-      if (newCount >= 3) {
-        const aiMsg: Message = {
-          role: "ai",
-          content:
-            "Thank you for sharing all that information, Sarah. I've completed your assessment. Based on our conversation, I've prepared a health report for a professional to review. Please select a healthcare professional below to send your report to:",
-        };
-        setMessages((prev) => [...prev, aiMsg]);
-        setIsTyping(false);
-        setPhase("select-professional");
-        return;
-      }
+    // 2. Await Gemini Response
+    try {
+      const response = await chatRef.current.sendMessage({ message: text });
+      const aiText = response.text || "";
 
-      const aiResponses: Record<string, string> = {
-        "I feel great today!":
-          "That's wonderful to hear!  Any changes in sleep quality, diet, or physical activity since yesterday?",
-        "I have a mild headache":
-          "I'm sorry to hear that. Can you describe the headache? Is it throbbing, dull, or sharp? When did it start?",
-        "I'm feeling tired":
-          "Let's look into that. How many hours did you sleep last night? Have you been staying hydrated?",
-        "I have some pain":
-          "I'd like to help. Can you tell me where the pain is located and rate it from 1-10?",
-      };
-      const aiMsg: Message = {
-        role: "ai",
-        content:
-          aiResponses[text] ||
-          "Thank you for sharing. Could you tell me more about how you're feeling? Any specific symptoms or changes you've noticed?",
-      };
+      const aiMsg: Message = { role: "ai", content: aiText };
       setMessages((prev) => [...prev, aiMsg]);
       setIsTyping(false);
-    }, 1500);
+
+      // 3. Check for Completion Condition in Output
+      const lowerText = aiText.toLowerCase();
+      if (
+        lowerText.includes("ready to compile") ||
+        lowerText.includes("summarize the findings") ||
+        lowerText.includes("report for a doctor")
+      ) {
+        // The AI has indicated it's finished the intake
+        setTimeout(() => setPhase("review-report"), 2000);
+      }
+    } catch (err) {
+      console.error("AI Communication Error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          content:
+            "I'm having trouble understanding you right now. Please try again.",
+        },
+      ]);
+      setIsTyping(false);
+    }
+  };
+
+  const handleSendToDoctor = async () => {
+    try {
+      // Send the generated report conversation to the backend
+      await api.post("/report", {
+        messages: messages,
+        patientName: "Sarah", // NOTE: In a real flow, use 'user?.name'
+      });
+      console.log("Successfully posted report to backend.");
+    } catch (err) {
+      console.error("Failed to push report to backend:", err);
+      // Allowing the UI to gracefully proceed for demo/mock paths
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        content:
+          "Please select a healthcare professional below to send your generated report to:",
+      },
+    ]);
+    setPhase("select-professional");
   };
 
   const selectProfessional = (prof: Professional) => {
@@ -183,7 +244,7 @@ export default function PatientCheckin() {
   return (
     <div className="animate-fade-in flex h-[calc(100vh-4rem)] flex-col">
       <div className="mb-6">
-        <h1 className="text-foreground">AI Assistant</h1>
+        <h1 className="text-foreground">Health Partner</h1>
         <p className="mt-1 text-body text-muted-foreground">
           Chat with your AI health partner
         </p>
@@ -249,6 +310,19 @@ export default function PatientCheckin() {
                 Your report is under review by {selectedProfessional.name}.
                 Please wait shortly...
               </p>
+            </div>
+          )}
+
+          {/* Review Report Button */}
+          {phase === "review-report" && (
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={handleSendToDoctor}
+                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-body font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              >
+                <Send className="h-5 w-5" />
+                Send Report to Doctor
+              </button>
             </div>
           )}
 

@@ -1,6 +1,7 @@
 import { Activity, ClipboardList, Shield, TrendingUp } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { RiskBadge } from "@/components/RiskBadge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const recentCheckins = [
   { date: "Today", symptoms: "Mild headache, fatigue", risk: "low" as const },
@@ -23,10 +24,14 @@ const upcomingTasks = [
 ];
 
 export default function PatientDashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
-        <h1 className="text-foreground">Good morning, Sarah 👋</h1>
+        <h1 className="text-foreground">
+          Good morning, {user?.name || "Sarah"}
+        </h1>
         <p className="mt-1 text-body-lg text-muted-foreground">
           Here's your health overview for today.
         </p>
@@ -108,13 +113,12 @@ export default function PatientDashboard() {
                   </p>
                 </div>
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-small font-medium ${
-                    item.priority === "high"
+                  className={`inline-flex rounded-full px-3 py-1 text-small font-medium ${item.priority === "high"
                       ? "bg-destructive/10 text-destructive"
                       : item.priority === "medium"
                         ? "bg-warning/10 text-warning"
                         : "bg-muted text-muted-foreground"
-                  }`}
+                    }`}
                 >
                   {item.priority}
                 </span>

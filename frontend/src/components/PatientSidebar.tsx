@@ -1,15 +1,35 @@
 import { Home, ClipboardList, FileText, Settings, LogOut } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const mainLinks = [
   { icon: Home, label: "Overview", to: "/patient" },
-  { icon: ClipboardList, label: "AI Assistant", to: "/patient/ai-assistant" },
+  { icon: ClipboardList, label: "Health Partner", to: "/patient/ai-assistant" },
   { icon: FileText, label: "My Plan", to: "/patient/plan" },
 ];
 
 export function PatientSidebar({ isMobile }: { isMobile?: boolean }) {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  // Helper to generate initials from name (e.g., 'John Doe' => 'JD')
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+  const initials = user?.name ? getInitials(user.name) : "U";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <aside
       className={cn(
@@ -56,26 +76,27 @@ export function PatientSidebar({ isMobile }: { isMobile?: boolean }) {
 
         {/* Bottom Profile Card */}
         <div className="mt-8 border-t border-slate-100 pt-4">
-          <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-3 shadow-sm">
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-3 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shadow-sm">
-                SJ
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm shadow-sm">
+                {initials}
               </div>
-              <div className="flex flex-col">
-                <span className="text-[14px] font-semibold text-slate-800 leading-tight">
-                  Sarah J.
+              <div className="flex flex-col min-w-0">
+                <span className="text-[14px] font-semibold text-slate-800 leading-tight truncate">
+                  {user?.name || "Patient Name"}
                 </span>
-                <span className="text-[12px] text-slate-500">
+                <span className="text-[12px] text-slate-500 truncate">
                   Patient Profile
                 </span>
               </div>
             </div>
 
             <button
-              className="group flex h-9 w-9 items-center justify-center rounded-lg hover:bg-slate-200/50 transition-colors"
-              title="Logout"
+              onClick={handleLogout}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-white border border-slate-200 px-3 py-2 text-[14px] font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
             >
-              <LogOut className="h-4 w-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
+              <LogOut className="h-4 w-4" />
+              Logout
             </button>
           </div>
         </div>
