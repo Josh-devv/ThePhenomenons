@@ -2,13 +2,31 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Heart, Stethoscope } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LandingPage() {
   const [role, setRole] = useState<"patient" | "professional">("patient");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Extract name from email input (e.g., 'john.doe@email.com' -> 'John doe')
+    const emailInput = (e.target as HTMLFormElement).elements.namedItem(
+      "email",
+    ) as HTMLInputElement;
+    const emailStr = emailInput.value;
+    const namePart = emailStr.split("@")[0];
+    const extractedName =
+      namePart.charAt(0).toUpperCase() + namePart.slice(1).replace(".", " ");
+
+    login({
+      name: extractedName || "User",
+      email: emailStr,
+      role: role,
+    });
+
     if (role === "patient") {
       navigate("/patient");
     } else {

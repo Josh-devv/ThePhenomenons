@@ -7,9 +7,10 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const mainLinks = [
   { icon: BarChart3, label: "Dashboard", to: "/professional" },
@@ -28,6 +29,14 @@ const bottomLinks = [
 ];
 
 export function ProfessionalSidebar({ isMobile }: { isMobile?: boolean }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <aside
       className={cn(
@@ -89,7 +98,10 @@ export function ProfessionalSidebar({ isMobile }: { isMobile?: boolean }) {
               {link.label}
             </NavLink>
           ))}
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium text-primary-foreground/70 transition-colors hover:text-primary-foreground">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+          >
             <LogOut className="h-5 w-5" />
             Logout
           </button>

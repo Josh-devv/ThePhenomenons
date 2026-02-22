@@ -1,6 +1,7 @@
-import { Users, FileText, AlertTriangle, TrendingUp } from "lucide-react";
+import { Users, FileText, AlertTriangle, TrendingUp, Star } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { RiskBadge } from "@/components/RiskBadge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const recentPatients = [
   {
@@ -22,12 +23,14 @@ const pendingReports = [
 ];
 
 export default function ProfessionalDashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
         <h1 className="text-foreground">Dashboard</h1>
         <p className="mt-1 text-body-lg text-muted-foreground">
-          Welcome back, Dr. Chen
+          Welcome back, Dr. {user?.name || "Chen"}
         </p>
       </div>
 
@@ -45,14 +48,14 @@ export default function ProfessionalDashboard() {
           title="Pending Reviews"
           value={8}
           icon={FileText}
-          trend="3 urgent"
+          trend="Needs attention"
           className="bg-primary/5 shadow-lg hover:shadow-xl transition-shadow"
         />
         <StatCard
-          title="High Risk Alerts"
-          value={5}
-          icon={AlertTriangle}
-          trend="2 new today"
+          title="New Reviews"
+          value={14}
+          icon={Star}
+          trend="Submitted recently"
           className="bg-primary/5 shadow-lg hover:shadow-xl transition-shadow"
         />
         <StatCard

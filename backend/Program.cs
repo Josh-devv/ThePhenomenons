@@ -15,7 +15,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICheckInService, CheckInService>();
+builder.Services.AddScoped<IAiFollowUpService, AiFollowUpService>();
 builder.Services.AddScoped<IConsultationService, ConsultationService>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+builder.Services.AddHttpClient<IAiClient, AiClient>(client =>
+{
+    var baseUrl = builder.Configuration["AiService:BaseUrl"];
+    client.BaseAddress = new Uri(baseUrl!);
+    client.Timeout = TimeSpan.FromSeconds(
+        int.Parse(builder.Configuration["AiService:TimeoutSeconds"] ?? "20"));
+});
 
 // Controllers
 builder.Services.AddControllers();
@@ -79,7 +96,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // Optional: HttpClient for calling your colleague’s Python AI later
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<ICheckInService, CheckInService>();
 
 // =====================================================
 // BUILD APP (Middleware Pipeline)
@@ -95,6 +112,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

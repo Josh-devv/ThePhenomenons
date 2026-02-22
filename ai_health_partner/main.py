@@ -1,19 +1,10 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  # 1. Import the middleware
-from routes.chat import router as chat_router 
+from fastapi.middleware.cors import CORSMiddleware
+from routes.chat import router as chat_router
 
 app = FastAPI()
 
-# It defines the list of allowed origins (the URLs of our frontend and C# backend)
-origins = [
-    "http://localhost",
-    "http://localhost:3000",  # Common React/Vue frontend port
-    "http://localhost:5000",  # Common ASP.NET Core port
-    "http://localhost:5001",
-    "https://your-future-production-domain.com"
-]
-
-# To add middleware to the FastAPI app
+# Enable CORS so the C# backend and frontend can talk to the AI_Sevice
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,8 +13,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# T0 connects the chat.py endpoints to the main web server
-app.include_router(chat_router, prefix="/api", tags=["Chatbot"])
+app.include_router(chat_router, tags=["Chatbot"])
 
 @app.get("/")
 async def root():
