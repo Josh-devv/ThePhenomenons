@@ -1,17 +1,8 @@
 import { CheckCircle, Circle, Clock } from "lucide-react";
 
 const planItems = [
-  { category: "Nutrition", tasks: [
-    { title: "Increase water intake to 8 glasses/day", status: "completed" },
-    { title: "Add leafy greens to 2 meals daily", status: "completed" },
-    { title: "Reduce sodium intake below 2300mg", status: "in-progress" },
-    { title: "Include omega-3 rich foods 3x/week", status: "pending" },
-  ]},
-  { category: "Exercise", tasks: [
-    { title: "30 minutes brisk walking daily", status: "completed" },
-    { title: "Stretching routine - morning & evening", status: "in-progress" },
-    { title: "Strength training 2x/week", status: "pending" },
-  ]},
+
+
   { category: "Mental Health", tasks: [
     { title: "10 minutes daily meditation", status: "in-progress" },
     { title: "Sleep 7-8 hours consistently", status: "completed" },

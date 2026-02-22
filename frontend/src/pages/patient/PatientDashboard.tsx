@@ -108,13 +108,12 @@ export default function PatientDashboard() {
                   </p>
                 </div>
                 <span
-                  className={`inline-flex rounded-full px-3 py-1 text-small font-medium ${
-                    item.priority === "high"
+                  className={`inline-flex rounded-full px-3 py-1 text-small font-medium ${item.priority === "high"
                       ? "bg-destructive/10 text-destructive"
                       : item.priority === "medium"
                         ? "bg-warning/10 text-warning"
                         : "bg-muted text-muted-foreground"
-                  }`}
+                    }`}
                 >
                   {item.priority}
                 </span>
