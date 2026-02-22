@@ -1,7 +1,5 @@
 fastapi
 pydantic
-numpy
 joblib
 uvicorn
-pytest
-httpx
+numpy
