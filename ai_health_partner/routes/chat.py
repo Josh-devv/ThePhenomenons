@@ -1,48 +1,59 @@
 from fastapi import APIRouter, HTTPException
-from schemas import ChatRequest, TriageReport, FollowUpReport
+from schemas import (
+    ChatRequest, ChatResponse, 
+    ReportRequest, ReportResponse,
+    FollowUpNextRequest, FollowUpNextResponse,
+    FollowUpRespondRequest, FollowUpRespondResponse
+)
+
+# To import the underlying NLP logic
 from nlp.initial_triage import triage_chat
 from nlp.follow_up import follow_up
-from nlp.report import generate_triage_report, generate_followup_report
+from nlp.session import get_state
 
 # This creates the router module
 router = APIRouter()
 
-@router.post("/{user_id}/{chat_module}")
-def chat(user_id: str, chat_module: str, req: ChatRequest):
-    chat_module = chat_module.lower()
+@router.post("/chat", response_model=ChatResponse)
+def handle_chat(req: ChatRequest):
+    """Handles the main triage conversation."""
+    reply_text = triage_chat(req.user_id, req.message)
+    return ChatResponse(reply=reply_text)
 
-    # To route the request to the correct conversation engine
-    if chat_module == "triage":
-        reply = triage_chat(user_id, req.user_input)
-    elif chat_module == "followup":
-        reply = follow_up(user_id, req.user_input)
-    else:
-        # To return a professional error if the website sends a bad request
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid chat module. Please use 'triage' or 'followup'."
-        )
+@router.post("/report", response_model=ReportResponse)
+def handle_report(req: ReportRequest):
+    """Generates the structured report for the C# database."""
+    data = get_state(req.user_id).get("data", {})
+    
+    # To extract symptoms and triggers, ensuring they are lists
+    symptoms_data = data.get('symptoms', ["None reported"])
+    triggers_data = data.get('triggers', ["None identified"])
+    
+    symptoms_list = [symptoms_data] if isinstance(symptoms_data, str) else symptoms_data
+    triggers_list = [triggers_data] if isinstance(triggers_data, str) else triggers_data
 
-    return {"reply": reply, "confidence": req.confidence}
+    # To build the summary text
+    summary_text = (
+        f"Patient assessment for {req.user_id}. "
+        f"Duration: {data.get('duration', 'N/A')}. "
+        f"Severity: {data.get('severity', 'N/A')}."
+    )
+    
+    return ReportResponse(
+        summary=summary_text,
+        symptoms=symptoms_list,
+        triggers=triggers_list
+    )
 
-@router.get("/{user_id}/report/triage", response_model=TriageReport)
-def get_triage_report(user_id: str):
-    """
-    Fetches the final structured triage report for the specific user session.
-    The ASP.NET backend will call this to populate the professional dashboard.
-    """
-    report = generate_triage_report(user_id)
-    if not report:
-        raise HTTPException(status_code=404, detail="Triage report not found.")
-    return report
+@router.post("/followup/next", response_model=FollowUpNextResponse)
+def handle_followup_next(req: FollowUpNextRequest):
+    """Determines the next clarifying question."""
+    # Placeholder: Replace with your logic to get the next question
+    next_question = "Have you experienced any shortness of breath recently?"
+    return FollowUpNextResponse(prompt=next_question)
 
-@router.get("/{user_id}/report/followup", response_model=FollowUpReport)
-def get_followup_report(user_id: str, has_new_symptoms: bool = False):
-    """
-    Fetches the comprehensive follow-up report for a specific user.
-    Includes the 7-day health score and medication adherence data.
-    """
-    report = generate_followup_report(user_id, has_new_symptoms)
-    if not report:
-        raise HTTPException(status_code=404, detail="Follow-up report not found.")
-    return report
+@router.post("/followup/respond", response_model=FollowUpRespondResponse)
+def handle_followup_respond(req: FollowUpRespondRequest):
+    """Processes the patient's answer to the follow-up question."""
+    reply_text = follow_up(req.user_id, req.message)
+    return FollowUpRespondResponse(reply=reply_text)
