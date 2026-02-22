@@ -1,6 +1,7 @@
 import { Users, FileText, AlertTriangle, TrendingUp } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { RiskBadge } from "@/components/RiskBadge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const recentPatients = [
   {
@@ -22,12 +23,14 @@ const pendingReports = [
 ];
 
 export default function ProfessionalDashboard() {
+  const { user } = useAuth();
+
   return (
     <div className="animate-fade-in">
       <div className="mb-8">
         <h1 className="text-foreground">Dashboard</h1>
         <p className="mt-1 text-body-lg text-muted-foreground">
-          Welcome back, Dr. Chen
+          Welcome back, Dr. {user?.name || "Chen"}
         </p>
       </div>
 

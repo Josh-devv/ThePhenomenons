@@ -19,42 +19,45 @@ import ProfessionalTemplates from "./pages/professional/ProfessionalTemplates";
 import ProfessionalProfile from "./pages/professional/ProfessionalProfile";
 import ProfessionalSettings from "./pages/professional/ProfessionalSettings";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
 
-          {/* Patient Routes */}
-          <Route path="/patient" element={<PatientLayout />}>
-            <Route index element={<PatientDashboard />} />
-            <Route path="ai-assistant" element={<PatientCheckin />} />
-            <Route path="plan" element={<PatientPlan />} />
-            <Route path="profile" element={<PatientProfile />} />
-            <Route path="settings" element={<PatientSettings />} />
-          </Route>
+            {/* Patient Routes */}
+            <Route path="/patient" element={<PatientLayout />}>
+              <Route index element={<PatientDashboard />} />
+              <Route path="ai-assistant" element={<PatientCheckin />} />
+              <Route path="plan" element={<PatientPlan />} />
+              <Route path="profile" element={<PatientProfile />} />
+              <Route path="settings" element={<PatientSettings />} />
+            </Route>
 
-          {/* Professional Routes */}
-          <Route path="/professional" element={<ProfessionalLayout />}>
-            <Route index element={<ProfessionalDashboard />} />
-            <Route path="patients" element={<ProfessionalPatients />} />
-            <Route path="chat/:patientId" element={<ProfessionalChat />} />
-            <Route path="reports" element={<ProfessionalReports />} />
-            <Route path="templates" element={<ProfessionalTemplates />} />
-            <Route path="profile" element={<ProfessionalProfile />} />
-            <Route path="settings" element={<ProfessionalSettings />} />
-          </Route>
+            {/* Professional Routes */}
+            <Route path="/professional" element={<ProfessionalLayout />}>
+              <Route index element={<ProfessionalDashboard />} />
+              <Route path="patients" element={<ProfessionalPatients />} />
+              <Route path="chat/:patientId" element={<ProfessionalChat />} />
+              <Route path="reports" element={<ProfessionalReports />} />
+              <Route path="templates" element={<ProfessionalTemplates />} />
+              <Route path="profile" element={<ProfessionalProfile />} />
+              <Route path="settings" element={<ProfessionalSettings />} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
