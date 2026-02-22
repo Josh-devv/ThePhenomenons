@@ -8,6 +8,7 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
+import { api } from "@/api/api";
 
 interface Message {
   role: "ai" | "user";
@@ -83,6 +84,7 @@ const quickReplies = [
 
 type ChatPhase =
   | "chat"
+  | "review-report"
   | "select-professional"
   | "under-review"
   | "rejected"
@@ -112,11 +114,11 @@ export default function PatientCheckin() {
         const aiMsg: Message = {
           role: "ai",
           content:
-            "Thank you for sharing all that information, Sarah. I've completed your assessment. Based on our conversation, I've prepared a health report for a professional to review. Please select a healthcare professional below to send your report to:",
+            "Thank you for sharing all that information. I've completed your assessment and compiled a health report based on our conversation.",
         };
         setMessages((prev) => [...prev, aiMsg]);
         setIsTyping(false);
-        setPhase("select-professional");
+        setPhase("review-report");
         return;
       }
 
@@ -139,6 +141,30 @@ export default function PatientCheckin() {
       setMessages((prev) => [...prev, aiMsg]);
       setIsTyping(false);
     }, 1500);
+  };
+
+  const handleSendToDoctor = async () => {
+    try {
+      // Send the generated report conversation to the backend
+      await api.post("/report", {
+        messages: messages,
+        patientName: "Sarah", // NOTE: In a real flow, use 'user?.name'
+      });
+      console.log("Successfully posted report to backend.");
+    } catch (err) {
+      console.error("Failed to push report to backend:", err);
+      // Allowing the UI to gracefully proceed for demo/mock paths
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "ai",
+        content:
+          "Please select a healthcare professional below to send your generated report to:",
+      },
+    ]);
+    setPhase("select-professional");
   };
 
   const selectProfessional = (prof: Professional) => {
@@ -249,6 +275,19 @@ export default function PatientCheckin() {
                 Your report is under review by {selectedProfessional.name}.
                 Please wait shortly...
               </p>
+            </div>
+          )}
+
+          {/* Review Report Button */}
+          {phase === "review-report" && (
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={handleSendToDoctor}
+                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-body font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              >
+                <Send className="h-5 w-5" />
+                Send Report to Doctor
+              </button>
             </div>
           )}
 

@@ -4,7 +4,7 @@ import { LucideIcon } from "lucide-react";
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   trend?: string;
   trendUp?: boolean;
   className?: string;
@@ -28,16 +28,23 @@ export function StatCard({
             <p
               className={cn(
                 "mt-1 text-small font-medium",
-                trendUp ? "text-success" : "text-destructive",
+                trendUp === undefined
+                  ? "text-muted-foreground"
+                  : trendUp
+                    ? "text-success"
+                    : "text-destructive",
               )}
             >
-              {trendUp ? "↑" : "↓"} {trend}
+              {trendUp !== undefined && (trendUp ? "↑ " : "↓ ")}
+              {trend}
             </p>
           )}
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-          <Icon className="h-6 w-6 text-primary" />
-        </div>
+        {Icon && (
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <Icon className="h-6 w-6 text-primary" />
+          </div>
+        )}
       </div>
     </div>
   );
